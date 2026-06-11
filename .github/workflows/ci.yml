@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Sigma Deployment
 
 on:
   workflow_dispatch:
@@ -6,32 +6,60 @@ on:
       pipeline_id:
         description: "Pipeline ID"
         required: true
+
       customer:
-        description: "Customer"
+        description: "Customer Name"
         required: true
+
       vendor:
-        description: "Vendor"
+        description: "Vendor Name"
         required: true
 
 jobs:
-  build:
+
+  validation:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Create Report
+      - name: Validation Stage
         run: |
-          echo "Pipeline ID: ${{ github.event.inputs.pipeline_id }}" > report.txt
-          echo "Pipeline Run ID: ${{ github.run_id }}" >> report.txt
-          echo "Customer: ${{ github.event.inputs.customer }}" >> report.txt
-          echo "Vendor: ${{ github.event.inputs.vendor }}" >> report.txt
-          echo "Environment: test" >> report.txt
-          echo "Status: success" >> report.txt
+          echo "Validation Started"
+          sleep 5
+          echo "Validation Success"
 
-      - name: Show Report
-        run: cat report.txt
+  deployment:
+    needs: validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deployment Stage
+        run: |
+          echo "Deployment Started"
+          sleep 5
+          echo "Deployment Success"
+
+      - name: Generate Artifact
+        run: |
+          mkdir -p artifact
+
+          cat << EOF > artifact/result.json
+          {
+            "pipeline_id":"${{ github.event.inputs.pipeline_id }}",
+            "pipeline_run_id":"${{ github.run_id }}",
+            "customer":"${{ github.event.inputs.customer }}",
+            "vendor":"${{ github.event.inputs.vendor }}",
+            "input_parameters":{
+              "Environment":"test"
+            },
+            "status":"success"
+          }
+          EOF
+
+      - name: Show Artifact
+        run: cat artifact/result.json
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pipeline-report
-          path: report.txt
+          name: deployment-result
+          path: artifact/result.json
