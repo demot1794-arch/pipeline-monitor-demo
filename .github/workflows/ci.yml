@@ -3,60 +3,63 @@ name: Sigma Deployment
 on:
   workflow_dispatch:
     inputs:
-      pipeline_id:
-        description: "Pipeline ID"
-        required: true
-
       customer:
-        description: "Customer Name"
+        description: Customer Name
         required: true
 
       vendor:
-        description: "Vendor Name"
+        description: Vendor Name
         required: true
 
 jobs:
 
   validation:
     runs-on: ubuntu-latest
-
     steps:
       - name: Validation Stage
         run: |
           echo "Validation Started"
-          sleep 5
+          sleep 10
           echo "Validation Success"
 
-  deployment:
+  build:
     needs: validation
     runs-on: ubuntu-latest
+    steps:
+      - name: Build Stage
+        run: |
+          echo "Build Started"
+          sleep 10
+          echo "Build Success"
 
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Stage
+        run: |
+          echo "Test Started"
+          sleep 5
+          echo "Test Success"
+
+  deployment:
+    needs: test
+    runs-on: ubuntu-latest
     steps:
       - name: Deployment Stage
         run: |
           echo "Deployment Started"
-          sleep 5
+          sleep 10
           echo "Deployment Success"
 
       - name: Generate Artifact
         run: |
-          mkdir -p artifact
-
-          cat << EOF > artifact/result.json
-          {
-            "pipeline_id":"${{ github.event.inputs.pipeline_id }}",
-            "pipeline_run_id":"${{ github.run_id }}",
-            "customer":"${{ github.event.inputs.customer }}",
-            "vendor":"${{ github.event.inputs.vendor }}",
-            "input_parameters":{
-              "Environment":"test"
-            },
-            "status":"success"
-          }
-          EOF
-
-      - name: Show Artifact
-        run: cat artifact/result.json
+          mkdir artifact
+          echo '{
+            "deployment_id":"GH123",
+            "rules_deployed":20,
+            "failed_rules":0
+          }' > artifact/result.json
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
