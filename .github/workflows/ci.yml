@@ -6,20 +6,11 @@ on:
       pipeline_id:
         description: "Pipeline ID"
         required: true
-      pipeline_run_id:
-        description: "Pipeline Run ID"
-        required: true
       customer:
         description: "Customer"
         required: true
       vendor:
         description: "Vendor"
-        required: true
-      environment:
-        description: "Environment"
-        required: true
-      status:
-        description: "Status"
         required: true
 
 jobs:
@@ -30,11 +21,11 @@ jobs:
       - name: Create Report
         run: |
           echo "Pipeline ID: ${{ github.event.inputs.pipeline_id }}" > report.txt
-          echo "Pipeline Run ID: ${{ github.event.inputs.pipeline_run_id }}" >> report.txt
+          echo "Pipeline Run ID: ${{ github.run_id }}" >> report.txt
           echo "Customer: ${{ github.event.inputs.customer }}" >> report.txt
           echo "Vendor: ${{ github.event.inputs.vendor }}" >> report.txt
-          echo "Environment: ${{ github.event.inputs.environment }}" >> report.txt
-          echo "Status: ${{ github.event.inputs.status }}" >> report.txt
+          echo "Environment: test" >> report.txt
+          echo "Status: success" >> report.txt
 
       - name: Show Report
         run: cat report.txt
